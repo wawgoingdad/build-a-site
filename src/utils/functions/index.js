@@ -238,6 +238,45 @@ export async function createStableDiffusionImage(args) {
   }
 }
 
+/**
+ * Azure Stable Diffusion Image
+ * @param {*} args 
+ * @returns 
+ */
+export async function createAzureStableDiffusionImage(args) {
+  try {
+    const response = await fetch(
+      `${process.env.AZURE_STABLE_DIFFUSION_ENDPOINT}/openai/deployments/${process.env.AZURE_STABLE_DIFFUSION_DEPLOYMENT_NAME}/images/generations?api-version=2023-06-01-preview`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'api-key': process.env.AZURE_STABLE_DIFFUSION_API_KEY,
+        },
+        body: JSON.stringify({
+          prompt: args.prompt,
+          n: args.count || 1,
+          size: `${args.width}x${args.height}`,
+          response_format: 'url'
+        }),
+      },
+    )
+
+    const result = await response.json()
+
+    if (!response.ok) {
+      console.error('Response status:', response.status)
+      console.error('generate_image error: ', result)
+      return result
+    }
+
+    return result
+  } catch (error) {
+    console.error('Error during fetch:', error)
+    throw error
+  }
+}
+
 export async function createDalle2Image(args) {
   try {
     const configuration = new Configuration({
